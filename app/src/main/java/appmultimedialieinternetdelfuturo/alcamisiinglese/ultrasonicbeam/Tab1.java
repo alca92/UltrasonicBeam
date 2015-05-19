@@ -41,7 +41,9 @@ public class Tab1 extends Fragment {
         @Override
         public void onClick(View v) {
             //			On click the signal generator is turned on by starting the SignalGenerator service
-            if (!SignalGenerator.isRunning) {
+            if (centralFrequencyText.getText().toString().equals("") && sendMessageText.getText().toString().equals("")) {
+                Toast.makeText(getActivity() /*getApplicationContext()*/, "Error, Insert parameters!", Toast.LENGTH_SHORT).show();
+            } else if (!SignalGenerator.isRunning) {
                 SignalGenerator.isRunning = true;
                 Toast.makeText(getActivity() /*getApplicationContext()*/ , "Sending...", Toast.LENGTH_SHORT).show();
 
