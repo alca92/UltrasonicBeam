@@ -47,7 +47,7 @@ public class SignalGenerator extends Service {
 
         binary = new byte[binaryString.length];
         for (int i = 0; i < binaryString.length; i++)
-            binary[i] = (byte) binaryString[i];
+            binary[i] = (byte) Character.getNumericValue(binaryString[i]);
 
         sample = new double[binary.length];
         generatedSnd = new byte[2 * binary.length];
@@ -83,7 +83,7 @@ public class SignalGenerator extends Service {
     void genTone(){
         double[] windowSamples = generateBW(generatedSnd.length);
         for (int i = 0; i < binary.length; ++i) {
-            sample[i] = binary[i] * windowSamples[i] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
+            sample[i] = /* binary[i]* */  windowSamples[i] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
         }
 
         // convert to 16 bit pcm sound array
