@@ -8,7 +8,6 @@ import android.media.AudioTrack;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.nio.charset.Charset;
 
@@ -101,10 +100,8 @@ public class SignalGenerator extends Service {
     }
 
     void playSound() {
-        //Toast.makeText(getApplicationContext(),"Sending...",Toast.LENGTH_SHORT).show();
         audioTrack.write(generatedSnd, 0, generatedSnd.length);
         audioTrack.play();
-        //Toast.makeText(getApplicationContext(), "Message transmitted", Toast.LENGTH_SHORT).show();
     }
 
     public double[] generateBW() {
@@ -119,13 +116,6 @@ public class SignalGenerator extends Service {
             w[m + n] = 0.42f + 0.5f * Math.cos(n * r) + 0.08f * Math.cos(2 * n * r);
         return w;
     }
-
-//    public String toBinary(byte[] bytes) {
-//        StringBuilder sb = new StringBuilder(bytes.length * Byte.SIZE);
-//        for (int i = 0; i < Byte.SIZE * bytes.length; i++)
-//            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
-//        return sb.toString();
-//    }
 
     public void toBinary(String message) {
         byte[] bytes = message.getBytes(Charset.forName(charset));
