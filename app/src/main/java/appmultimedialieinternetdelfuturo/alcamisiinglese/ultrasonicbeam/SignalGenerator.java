@@ -55,7 +55,7 @@ public class SignalGenerator extends Service {
 
                     Log.i(TAG, "playSound()");
                     try {
-                        Thread.sleep((long) (lenInSec * binary.length));
+                        Thread.sleep((long) (lenInSamples * binary.length));
                     } catch (InterruptedException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
