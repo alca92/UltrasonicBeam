@@ -74,13 +74,14 @@ public class SignalGenerator extends Service {
         double[] windowSamples = generateBW();
 
         sample = new double[lenInSamples];
-        int i = 0;
+        int k = 0;
 
-        for (boolean aBinary : binary)
-            if (aBinary)
-                for (; i < lenInSamples; i++)
-                    sample[i] = windowSamples[i] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
-
+        for (int i = 0; i < sample.length; i++) {
+            if (i % (lenInSamples - 1) == 0)
+                k++;
+            if (binary[k])
+                sample[i] = windowSamples[i] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
+        }
 
         // convert to 16 bit pcm sound array
         // assumes the sample buffer is normalised.
