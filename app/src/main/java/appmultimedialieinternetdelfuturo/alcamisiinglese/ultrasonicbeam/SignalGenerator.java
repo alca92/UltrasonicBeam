@@ -72,17 +72,12 @@ public class SignalGenerator extends Service {
 
     void genTone() {
         double[] windowSamples = generateBW();
-        sample = new double[binary.length * lenInSamples];
+//        sample = new double[binary.length * lenInSamples];
 
-
-        for (int i = 0, j = 1, k = 0; i < sample.length; i++) {
-            if (i == lenInSamples * j) {
-                k++;
-                j++;
-            }
+        for (int k = 0; k < binary.length; k++)
             if (binary[k])
-                sample[i] = /*windowSamples[i] * */ Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
-        }
+                for (int i = k * lenInSamples; i < (k + 1) * lenInSamples; i++)
+                    sample[i] = windowSamples[k] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
 
         // convert to 16 bit pcm sound array
         // assumes the sample buffer is normalised.
@@ -125,7 +120,7 @@ public class SignalGenerator extends Service {
 
         binary = new boolean[bytes.length * 8];
 
-        for (int i = 0; i < bytes.length * 8; i++) {
+        for (int i = 0; i < (bytes.length * 8); i++) {
             if ((bytes[i / 8] & (1 << (7 - (i % 8)))) > 0)
                 binary[i] = true;
         }
