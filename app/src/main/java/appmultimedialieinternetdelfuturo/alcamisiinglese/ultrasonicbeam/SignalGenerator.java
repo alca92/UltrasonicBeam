@@ -40,8 +40,8 @@ public class SignalGenerator extends Service {
         centralFrequency = Integer.parseInt(extras.getString("CentralFrequency"));
         toBinary(extras.getString("Message"));
 
-        //sample = new double[binary.length];
-        generatedSnd = new byte[2 * lenInSamples];
+        sample = new double[binary.length * lenInSamples];
+        generatedSnd = new byte[2 * sample.length];
 
         new Thread(new Runnable() {
             public void run() {
@@ -73,7 +73,7 @@ public class SignalGenerator extends Service {
     void genTone() {
         double[] windowSamples = generateBW();
 
-        sample = new double[lenInSamples];
+        //sample = new double[lenInSamples];
         int k = 0;
 
         for (int i = 0; i < sample.length; i++) {
