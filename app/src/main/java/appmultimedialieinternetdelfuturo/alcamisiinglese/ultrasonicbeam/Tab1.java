@@ -53,8 +53,11 @@ public class Tab1 extends Fragment {
 
                 Log.i(TAG, "CentralFrequency: " + centralFrequencyText.getText().toString());
                 Log.i(TAG, "Message: " + sendMessageText.getText().toString());
+                MainActivity.context.stopService(mServiceIntent);
                 MainActivity.context.startService(mServiceIntent);
-            }
+            } else
+                Toast.makeText(getActivity() /*getApplicationContext()*/, "Occupied, try later", Toast.LENGTH_SHORT).show();
+
         }
     };
 }

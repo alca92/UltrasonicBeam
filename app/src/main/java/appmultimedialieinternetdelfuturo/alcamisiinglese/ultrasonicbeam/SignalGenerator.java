@@ -20,7 +20,7 @@ public class SignalGenerator extends Service {
 
     public static boolean isRunning;
 
-    double lenInSec = 0.01;
+    double lenInSec = 0.1;
     int lenInSamples = (int) (lenInSec * SAMPLE_RATE);
     double sample[];
     boolean[] binary;
@@ -55,7 +55,7 @@ public class SignalGenerator extends Service {
 
                     Log.i(TAG, "playSound()");
                     try {
-                        Thread.sleep((long) (lenInSamples * binary.length));
+                        Thread.sleep((long) (lenInSec * binary.length * 1000));
                     } catch (InterruptedException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
