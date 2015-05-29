@@ -74,10 +74,11 @@ public class SignalGenerator extends Service {
         double[] windowSamples = generateBW();
 
         sample = new double[lenInSamples];
+        int i = 0;
 
         for (boolean aBinary : binary)
             if (aBinary)
-                for (int i = 0; i < lenInSamples; i++)
+                for (; i < lenInSamples; i++)
                     sample[i] = windowSamples[i] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
 
 
