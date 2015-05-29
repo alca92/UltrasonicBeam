@@ -40,6 +40,7 @@ public class SignalGenerator extends Service {
         centralFrequency = Integer.parseInt(extras.getString("CentralFrequency"));
         toBinary(extras.getString("Message"));
 
+        sample = new double[binary.length * lenInSamples];
         generatedSnd = new byte[2 * sample.length];
 
         new Thread(new Runnable() {
@@ -73,11 +74,14 @@ public class SignalGenerator extends Service {
         double[] windowSamples = generateBW();
         sample = new double[binary.length * lenInSamples];
 
-        for (int i = 0, k = 0; i < sample.length; i++) {        // un k per "LenInSamples" i
-            if (i % (lenInSamples - 1) == 0)                    // Quando i è un multiplo di LenInSamples,
-                k++;                                            // incremento k
-            if (binary[k])                                      // se il bit è a 1, allora finestro il bit.
-                sample[i] = windowSamples[i] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
+
+        for (int i = 0, j = 1, k = 0; i < sample.length; i++) {
+            if (i == lenInSamples * j) {
+                k++;
+                j++;
+            }
+            if (binary[k])
+                sample[i] = /*windowSamples[i] * */ Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
         }
 
         // convert to 16 bit pcm sound array
