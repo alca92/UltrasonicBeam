@@ -27,7 +27,7 @@ public class SignalGenerator extends Service {
     byte generatedSnd[];
     AudioTrack audioTrack;
 
-    String charset = "UTF-16";
+    String charset = "UTF-8";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -40,8 +40,8 @@ public class SignalGenerator extends Service {
         centralFrequency = Integer.parseInt(extras.getString("CentralFrequency"));
         toBinary(extras.getString("Message"));
 
-        sample = new double[binary.length];
-        generatedSnd = new byte[2 * binary.length];
+        //sample = new double[binary.length];
+        generatedSnd = new byte[2 * lenInSamples];
 
         new Thread(new Runnable() {
             public void run() {
@@ -73,11 +73,11 @@ public class SignalGenerator extends Service {
     void genTone() {
         double[] windowSamples = generateBW();
 
-        sample = new double[binary.length];
+        sample = new double[lenInSamples];
 
         for (boolean aBinary : binary)
             if (aBinary)
-                for (int i = 0; i < lenInSamples && i < binary.length; i++)
+                for (int i = 0; i < lenInSamples; i++)
                     sample[i] = windowSamples[i] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
 
 
