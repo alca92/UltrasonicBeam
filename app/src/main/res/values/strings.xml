@@ -6,4 +6,10 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ins_freq">Insert the frequency</string>
+    <string name="ins_mex">Insert the message</string>
+    <string name="ric_mex">Message received</string>
+    <string name="rec">RECEIVE</string>
+    <string name="send">SEND</string>
+    <string name="stop">STOP</string>
 </resources>

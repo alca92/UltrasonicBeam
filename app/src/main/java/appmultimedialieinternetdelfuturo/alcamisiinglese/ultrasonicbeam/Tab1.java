@@ -33,7 +33,7 @@ public class Tab1 extends Fragment {
         sendButton.setOnClickListener(SendButtonListener);
 
         //EditText
-        centralFrequencyText = (EditText) v.findViewById(R.id.selectFrequency);
+        centralFrequencyText = (EditText) v.findViewById(R.id.selectFrequencyS);
         sendMessageText = (EditText) v.findViewById(R.id.sendMessage);
         return v;
     }

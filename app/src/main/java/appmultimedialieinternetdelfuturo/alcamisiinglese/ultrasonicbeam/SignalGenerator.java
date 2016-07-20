@@ -20,8 +20,8 @@ public class SignalGenerator extends Service {
 
     public static boolean isRunning;
 
-    double lenInSec = 0.1;
-    int lenInSamples = (int) (lenInSec * SAMPLE_RATE);
+    static double lenInSec = 0.1;
+    static int lenInSamples = (int) (lenInSec * SAMPLE_RATE);
     double sample[];
     boolean[] binary;
     byte generatedSnd[];
@@ -102,7 +102,7 @@ public class SignalGenerator extends Service {
         audioTrack.play();
     }
 
-    public double[] generateBW() {
+    static public double[] generateBW() {
         // generate nSamples Blackman window function values
         int m = lenInSamples / 2;
         double r;

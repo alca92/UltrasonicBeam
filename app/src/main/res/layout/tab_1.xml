@@ -20,25 +20,47 @@
         android:background="@android:drawable/editbox_dropdown_light_frame"
         android:inputType="textCapSentences|textMultiLine"
         android:maxLines="4"
+        android:maxLength="140"
         android:scrollbars="vertical"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true" />
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true" />
 
     <Button
-        android:layout_width="50dp"
-        android:layout_height="45dp"
-        android:text=""
+        android:layout_width="150dp"
+        android:layout_height="75dp"
+        android:text="@string/send"
         android:id="@+id/sendButton"
-        android:layout_alignBottom="@+id/sendMessage"
-        android:layout_toEndOf="@+id/sendMessage" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="85dp" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
-        android:id="@+id/selectFrequency"
-        android:layout_below="@+id/textView"
-        android:layout_toStartOf="@+id/sendButton" />
+        android:id="@+id/selectFrequencyS"
+        android:layout_below="@+id/textView2"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/ins_freq"
+        android:id="@+id/textView2"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="61dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/ins_mex"
+        android:id="@+id/textView3"
+        android:layout_alignBaseline="@+id/textView"
+        android:layout_alignBottom="@+id/textView"
+        android:layout_alignStart="@+id/textView2" />
 
 </RelativeLayout>
