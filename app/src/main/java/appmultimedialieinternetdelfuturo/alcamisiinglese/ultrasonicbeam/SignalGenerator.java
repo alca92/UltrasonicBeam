@@ -8,6 +8,8 @@ import android.media.AudioTrack;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.Toast;
 
 import java.nio.charset.Charset;
 
@@ -16,18 +18,19 @@ public class SignalGenerator extends Service {
     private final String TAG = "SignalGenerator";
     // Signal Settings
     int centralFrequency;
-    private static final int SAMPLE_RATE = 44100;
 
-    public static boolean isRunning;
+    public static boolean isGenerating;
+    public static boolean isSyncing;
 
     static double lenInSec = 0.1;
-    static int lenInSamples = (int) (lenInSec * SAMPLE_RATE);
+    static int lenInSamples = (int) (lenInSec * MainActivity.SAMPLE_RATE); //4410
     double sample[];
     boolean[] binary;
     byte generatedSnd[];
     AudioTrack audioTrack;
 
-    String charset = "UTF-8";
+
+    static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -35,49 +38,88 @@ public class SignalGenerator extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Bundle extras = intent.getExtras();
-        centralFrequency = Integer.parseInt(extras.getString("CentralFrequency"));
-        toBinary(extras.getString("Message"));
+    public int onStartCommand(final Intent intent, int flags, int startId) {
 
-        sample = new double[binary.length * lenInSamples];
-        generatedSnd = new byte[2 * sample.length];
+        if (intent == null)
+            return Service.START_NOT_STICKY;
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            centralFrequency = Integer.parseInt(extras.getString("CentralFrequency"));
+            if (extras.containsKey("Message")) {
+                toBinary(extras.getString("Message"));
+                sample = new double[binary.length * lenInSamples];
+//          generatedSnd = new byte[2 * sample.length];
+            } else
+                binary = new boolean[1];
+        }
 
         new Thread(new Runnable() {
             public void run() {
-                if (isRunning) {
+                if (isSyncing || isGenerating) {
+
+                    if (isSyncing)
+                        sample = new double[50 * lenInSamples];
+
+                    generatedSnd = new byte[2 * sample.length];
+
                     audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                            SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
+                            MainActivity.SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
                             AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
                             AudioTrack.MODE_STATIC);
-                    genTone();
+                    genTone(isSyncing);
                     playSound();
-
-                    Log.i(TAG, "playSound()");
+                    Log.i(TAG, (isSyncing ? "Syncing" : "playSound()"));
                     try {
-                        Thread.sleep((long) (lenInSec * binary.length * 1000));
+                        Thread.sleep((long) (lenInSec * (isSyncing ? 50 : binary.length) * 1000));
                     } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                     audioTrack.flush();
                     audioTrack.stop();
                     audioTrack.release();
-                    isRunning = false;
+                    isGenerating = false;
+                    MainActivity.MainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.MainActivity,
+                                    (isSyncing ? "SYNC " : "") + "MESSAGE SENT",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    isSyncing = false;
+                    Tab1.Tab1.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Button sendButton = (Button) Tab1.Tab1.findViewById(R.id.sendButton);
+                            Button syncButton = (Button) Tab1.Tab1.findViewById(R.id.syncButtonS);
+                            sendButton.setText(R.string.send);
+                            syncButton.setText(R.string.sync);
+                            sendButton.setClickable(true);
+                            syncButton.setClickable(true);
+                        }
+                    });
                 }
             }
         }).start();
         return Service.START_STICKY;
     }
 
-    void genTone() {
-        double[] windowSamples = generateBW();
+
+    void genTone(boolean sync) {
+        double[] windowSamples = generateBW(lenInSamples);
 //        sample = new double[binary.length * lenInSamples];
 
-        for (int k = 0; k < binary.length; k++)
-            if (binary[k])
+        for (int k = 0; k < (sync ? 50 : binary.length); k++) //if syncing length = 50
+            if ((sync ? true : binary[k])) //if syncing then all ones, otherwise OOK modulation.
+
+                    /* Obviously I could simplify the condition (sync? true : binary[k]),
+                     * with (sync || binary[k]), but when I'm syncing I do not initialize
+                     * the array binary. So I won't simplify the code.
+                     */
+
                 for (int i = k * lenInSamples; i < (k + 1) * lenInSamples; i++)
-                    sample[i] = windowSamples[k] * Math.sin(centralFrequency * 2 * Math.PI * i / (SAMPLE_RATE));
+                    sample[i] = /*windowSamples[k] * */ Math.sin(centralFrequency * 2 * Math.PI * i /
+                            (MainActivity.SAMPLE_RATE));
 
         // convert to 16 bit pcm sound array
         // assumes the sample buffer is normalised.
@@ -99,15 +141,23 @@ public class SignalGenerator extends Service {
 
     void playSound() {
         audioTrack.write(generatedSnd, 0, generatedSnd.length);
+        if (isSyncing)
+            MainActivity.MainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.MainActivity, "Press Synchronize on the other device",
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
         audioTrack.play();
     }
 
-    static public double[] generateBW() {
+    static public double[] generateBW(int length) {
         // generate nSamples Blackman window function values
-        int m = lenInSamples / 2;
+        int m = length / 2;
         double r;
         double pi = Math.PI;
-        double[] w = new double[lenInSamples];
+        double[] w = new double[length];
         // Blackman Window
         r = pi / m;
         for (int n = -m; n < m; n++)
@@ -116,7 +166,7 @@ public class SignalGenerator extends Service {
     }
 
     public void toBinary(String message) {
-        byte[] bytes = message.getBytes(Charset.forName(charset));
+        byte[] bytes = message.getBytes(UTF8_CHARSET);
 
         binary = new boolean[bytes.length * 8];
 

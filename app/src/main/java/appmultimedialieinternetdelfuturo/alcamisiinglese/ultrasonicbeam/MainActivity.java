@@ -1,6 +1,8 @@
 package appmultimedialieinternetdelfuturo.alcamisiinglese.ultrasonicbeam;
 
+import android.app.Activity;
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -12,8 +14,10 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity {
 
     // Declaring Your View and Variables
-
+    public static Activity MainActivity = null;
+    public static final int SAMPLE_RATE = 44100;
     public static Context context = null;
+
 
     Toolbar toolbar;
     ViewPager pager;
@@ -28,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         context = getApplicationContext();
+        MainActivity = this;
+        final AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
         // Creating The Toolbar and setting it as the Toolbar for the activity
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
