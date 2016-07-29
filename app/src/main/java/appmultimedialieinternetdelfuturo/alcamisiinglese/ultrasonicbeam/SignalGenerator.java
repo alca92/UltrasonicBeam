@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import java.nio.charset.Charset;
 
+import appmultimedialieinternetdelfuturo.alcamisiinglese.ultrasonicbeam.libs.MathUtils;
+
 public class SignalGenerator extends Service {
 
     private final String TAG = "SignalGenerator";
@@ -22,11 +24,12 @@ public class SignalGenerator extends Service {
     public static boolean isGenerating;
     public static boolean isSyncing;
 
-    static double lenInSec = 0.1;
+    static double lenInSec = 0.1; //seconds
     static int lenInSamples = (int) (lenInSec * MainActivity.SAMPLE_RATE); //4410
     double sample[];
     boolean[] binary;
     byte generatedSnd[];
+    public static int trailerSize = 8;
     AudioTrack audioTrack;
 
 
@@ -48,7 +51,7 @@ public class SignalGenerator extends Service {
             if (extras.containsKey("Message")) {
                 toBinary(extras.getString("Message"));
                 sample = new double[binary.length * lenInSamples];
-//          generatedSnd = new byte[2 * sample.length];
+                generatedSnd = new byte[2 * sample.length];
             } else
                 binary = new boolean[1];
         }
@@ -58,7 +61,7 @@ public class SignalGenerator extends Service {
                 if (isSyncing || isGenerating) {
 
                     if (isSyncing)
-                        sample = new double[50 * lenInSamples];
+                        sample = new double[100 * lenInSamples];
 
                     generatedSnd = new byte[2 * sample.length];
 
@@ -70,7 +73,9 @@ public class SignalGenerator extends Service {
                     playSound();
                     Log.i(TAG, (isSyncing ? "Syncing" : "playSound()"));
                     try {
-                        Thread.sleep((long) (lenInSec * (isSyncing ? 50 : binary.length) * 1000));
+                        //Thread.sleep((long) (lenInSec * (isSyncing ? 100 : binary.length) * 1000));
+                        Thread.sleep((long) (generatedSnd.length / (2 * MainActivity.SAMPLE_RATE) * 1000));
+
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -82,11 +87,10 @@ public class SignalGenerator extends Service {
                         @Override
                         public void run() {
                             Toast.makeText(MainActivity.MainActivity,
-                                    (isSyncing ? "SYNC " : "") + "MESSAGE SENT",
+                                    ((isSyncing ? "SYNC " : "") + "MESSAGE SENT"),
                                     Toast.LENGTH_LONG).show();
                         }
                     });
-                    isSyncing = false;
                     Tab1.Tab1.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -98,6 +102,7 @@ public class SignalGenerator extends Service {
                             syncButton.setClickable(true);
                         }
                     });
+                    isSyncing = false;
                 }
             }
         }).start();
@@ -107,19 +112,24 @@ public class SignalGenerator extends Service {
 
     void genTone(boolean sync) {
         double[] windowSamples = generateBW(lenInSamples);
-//        sample = new double[binary.length * lenInSamples];
+        //sample = new double[binary.length * lenInSamples];
 
-        for (int k = 0; k < (sync ? 50 : binary.length); k++) //if syncing length = 50
+        for (int k = 0; k < (sync ? 100 : binary.length); k++) //if syncing => length = 100
             if ((sync ? true : binary[k])) //if syncing then all ones, otherwise OOK modulation.
-
-                    /* Obviously I could simplify the condition (sync? true : binary[k]),
-                     * with (sync || binary[k]), but when I'm syncing I do not initialize
-                     * the array binary. So I won't simplify the code.
-                     */
-
                 for (int i = k * lenInSamples; i < (k + 1) * lenInSamples; i++)
-                    sample[i] = /*windowSamples[k] * */ Math.sin(centralFrequency * 2 * Math.PI * i /
+                    sample[i] = windowSamples[k] * Math.sin(centralFrequency * 2 * Math.PI * i /
                             (MainActivity.SAMPLE_RATE));
+                        /*
+                         * Obviously I could simplify the condition (sync? true : binary[k]),
+                         * with (sync || binary[k]), but when I'm syncing I do not initialize
+                         * the array binary. So I won't simplify the code.
+                         */
+
+        //normalization
+        double sampleMax = MathUtils.max(sample);
+        for (int i = 0; i < sample.length; i++)
+            sample[i] /= sampleMax;
+
 
         // convert to 16 bit pcm sound array
         // assumes the sample buffer is normalised.
@@ -168,11 +178,15 @@ public class SignalGenerator extends Service {
     public void toBinary(String message) {
         byte[] bytes = message.getBytes(UTF8_CHARSET);
 
-        binary = new boolean[bytes.length * 8];
+        boolean[] binaryTemp = new boolean[bytes.length * 8];
+        binary = new boolean[binaryTemp.length + trailerSize];
 
-        for (int i = 0; i < (bytes.length * 8); i++) {
-            if ((bytes[i / 8] & (1 << (7 - (i % 8)))) > 0)
-                binary[i] = true;
+        for (int i = 0; i < (binaryTemp.length); i++) {
+            if (((bytes[i / 8] & (1 << (7 - (i % 8)))) > 0))
+                binaryTemp[i] = true;
         }
+        for (int i = 0; i < trailerSize; i++)
+            binary[i] = true;
+        System.arraycopy(binaryTemp, 0, binary, trailerSize - 1, binaryTemp.length);
     }
 }

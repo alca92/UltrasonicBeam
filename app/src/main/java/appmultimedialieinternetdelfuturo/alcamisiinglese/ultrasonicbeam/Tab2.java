@@ -65,6 +65,7 @@ public class Tab2 extends Fragment {
                 //MainActivity.context.stopService(mServiceIntent);
                 if (!SignalRecorder.isRunning)
                     MainActivity.context.startService(mServiceIntent);
+                receiveMessageText.setText("the message will appear here");
             } else if (SignalRecorder.isRecording) {
                 SignalRecorder.isRecording = false;
 //                MainActivity.context.stopService(mServiceIntent);
@@ -107,7 +108,6 @@ public class Tab2 extends Fragment {
                 mServiceIntent.putExtra("CentralFrequency", centralFrequencyText.getText().toString());
                 Log.i(TAG, "CentralFrequency: " + centralFrequencyText.getText().toString());
 
-                SignalRecorder.syncOnes = true;
 
                 //MainActivity.context.stopService(mServiceIntent);
                 if (!SignalRecorder.isRunning)
@@ -115,21 +115,18 @@ public class Tab2 extends Fragment {
 
                 mHandler.postDelayed(new Runnable() {
                     public void run() {
-                        SignalRecorder.syncOnes = false;
-                        SignalRecorder.messageEnded = true;
-                    }
-                }, 6000);
-                mHandler.postDelayed(new Runnable() {
-                    public void run() {
-                        SignalRecorder.syncOnes = false;
-                        MainActivity.context.stopService(mServiceIntent);
-                        receiveButton.setText(R.string.rec);
-                        syncButton.setText(R.string.sync);
                         SignalRecorder.isSyncing = false;
+                        //MainActivity.context.stopService(mServiceIntent);
+                        SignalRecorder.isRecording = true;
+//                        receiveButton.setText(R.string.rec);
+                        syncButton.setText(R.string.sync);
                         receiveButton.setClickable(true);
-                        syncButton.setClickable(true);
+//                        syncButton.setClickable(true);
+                        Toast.makeText(getActivity(), "Receiving...", Toast.LENGTH_SHORT).show();
+                        receiveButton.setText(R.string.stop);
+                        syncButton.setClickable(false);
                     }
-                }, 10000);
+                }, 20000);
             } else
                 Toast.makeText(getActivity(), "Occupied, try later", Toast.LENGTH_SHORT).show();
         }
